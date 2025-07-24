@@ -1,0 +1,301 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/router";
+
+export default function Marketplace() {
+  const [listings, setListings] = useState([]);
+  const [filterType, setFilterType] = useState("sell");
+  const router = useRouter();
+
+  useEffect(() => {
+    // Placeholder: Replace with actual API call
+    const demoListings = [
+      { id: 1, type: "sell", volumeAF: 20, pricePerAF: 220, district: "Kern" },
+      { id: 2, type: "buy", volumeAF: 10, pricePerAF: 180, district: "Tulare" },
+    ];
+    setListings(demoListings);
+  }, []);
+
+  const filtered = listings.filter((l) => l.type === filterType);
+
+  const handleCreateListing = () => {
+    router.push("/create-listing");
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Water Credits Marketplace</h1>
+
+      <div className="flex gap-2 mb-6">
+        <Button onClick={() => setFilterType("sell")} variant={filterType === "sell" ? "default" : "outline"}>Buy Water</Button>
+        <Button onClick={() => setFilterType("buy")} variant={filterType === "buy" ? "default" : "outline"}>Sell Water</Button>
+        <Button onClick={handleCreateListing} variant="outline" className="ml-auto">Create Listing</Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filtered.map((listing) => (
+          <Card key={listing.id}>
+            <CardContent className="p-4">
+              <h3 className="text-lg font-semibold text-green-700 capitalize">{listing.type}: {listing.volumeAF} AF</h3>
+              <p className="text-gray-500">District: {listing.district}</p>
+              <p className="text-gray-500">Price: ${listing.pricePerAF}/AF</p>
+              <Button className="mt-3 w-full">Trade Now</Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+import { useState } from "react";
+import { useRouter } from "next/router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+
+export default function CreateListing() {
+  const [type, setType] = useState("sell");
+  const [volumeAF, setVolumeAF] = useState(0);
+  const [pricePerAF, setPricePerAF] = useState(0);
+  const [district, setDistrict] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = { type, volumeAF, pricePerAF, district };
+    console.log("Submitting:", payload);
+    // TODO: Replace with POST request to backend API
+    router.push("/");
+  };
+
+  return (
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Create a New Listing</h1>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div>
+          <Label>Type</Label>
+          <Select value={type} onValueChange={setType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sell">Sell</SelectItem>
+              <SelectItem value="buy">Buy</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Volume (Acre-Feet)</Label>
+          <Input
+            type="number"
+            min="0"
+            value={volumeAF}
+            onChange={(e) => setVolumeAF(parseFloat(e.target.value))}
+          />
+        </div>
+        <div>
+          <Label>Price per AF ($)</Label>
+          <Input
+            type="number"
+            min="0"
+            value={pricePerAF}
+            onChange={(e) => setPricePerAF(parseFloat(e.target.value))}
+          />
+        </div>
+        <div>
+          <Label>Water District</Label>
+          <Input
+            type="text"
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+          />
+        </div>
+        <Button type="submit" className="w-full">Submit Listing</Button>
+      </form>
+    </div>
+  );
+}
+
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export default function Dashboard() {
+  const [activeListings, setActiveListings] = useState([]);
+  const [tradeHistory, setTradeHistory] = useState([]);
+
+  useEffect(() => {
+    // TODO: Replace with real API calls
+    const demoListings = [
+      { id: 1, type: "sell", volumeAF: 15, pricePerAF: 210, district: "Kings" },
+      { id: 2, type: "buy", volumeAF: 8, pricePerAF: 190, district: "Fresno" },
+    ];
+    const demoTrades = [
+      { id: 1, type: "buy", volumeAF: 12, pricePerAF: 200, district: "Merced", status: "completed" },
+    ];
+    setActiveListings(demoListings);
+    setTradeHistory(demoTrades);
+  }, []);
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Your Dashboard</h1>
+
+      <section className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">Active Listings</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {activeListings.map((listing) => (
+            <Card key={listing.id}>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-blue-700 capitalize">{listing.type}: {listing.volumeAF} AF</h3>
+                <p className="text-gray-500">District: {listing.district}</p>
+                <p className="text-gray-500">Price: ${listing.pricePerAF}/AF</p>
+                <Button className="mt-3 w-full" variant="outline">Edit</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold mb-2">Trade History</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {tradeHistory.map((trade) => (
+            <Card key={trade.id}>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-green-600">{trade.type.toUpperCase()} {trade.volumeAF} AF</h3>
+                <p className="text-gray-500">District: {trade.district}</p>
+                <p className="text-gray-500">Price: ${trade.pricePerAF}/AF</p>
+                <p className="text-sm text-gray-400">Status: {trade.status}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// File: prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  farmName  String?
+  district  String?
+  listings  Listing[]
+  tradesAsBuyer  Trade[] @relation("buyerTrades")
+  tradesAsSeller Trade[] @relation("sellerTrades")
+}
+
+model Listing {
+  id         String   @id @default(uuid())
+  type       String
+  volumeAF   Float
+  pricePerAF Float
+  district   String
+  status     String   @default("open")
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  trades     Trade[]
+}
+
+model Trade {
+  id          String   @id @default(uuid())
+  volumeAF    Float
+  agreedPrice Float
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+
+  buyer       User     @relation("buyerTrades", fields: [buyerId], references: [id])
+  buyerId     String
+  seller      User     @relation("sellerTrades", fields: [sellerId], references: [id])
+  sellerId    String
+
+  listing     Listing  @relation(fields: [listingId], references: [id])
+  listingId   String
+}
+
+// File: server/index.js
+
+import express from "express";
+import cors from "cors";
+import { PrismaClient } from "@prisma/client";
+import { clerkExpressWithAuth } from "@clerk/express";
+import { requireAuth } from "./middleware/requireAuth.js";
+
+const app = express();
+const prisma = new PrismaClient();
+
+app.use(cors());
+app.use(express.json());
+app.use(clerkExpressWithAuth());
+
+// GET /listings
+app.get("/api/listings", async (req, res) => {
+  const listings = await prisma.listing.findMany({
+    include: { user: true }
+  });
+  res.json(listings);
+});
+
+// POST /listings (auth required)
+app.post("/api/listings", requireAuth, async (req, res) => {
+  const { type, volumeAF, pricePerAF, district } = req.body;
+  const userId = req.auth.userId;
+
+  const newListing = await prisma.listing.create({
+    data: { type, volumeAF, pricePerAF, district, userId }
+  });
+  res.status(201).json(newListing);
+});
+
+// GET /trades
+app.get("/api/trades", async (req, res) => {
+  const trades = await prisma.trade.findMany({
+    include: { buyer: true, seller: true, listing: true }
+  });
+  res.json(trades);
+});
+
+// POST /trades (auth required)
+app.post("/api/trades", requireAuth, async (req, res) => {
+  const { sellerId, listingId, volumeAF, agreedPrice } = req.body;
+  const buyerId = req.auth.userId;
+
+  const trade = await prisma.trade.create({
+    data: { buyerId, sellerId, listingId, volumeAF, agreedPrice }
+  });
+  res.status(201).json(trade);
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// File: server/middleware/requireAuth.js
+
+export function requireAuth(req, res, next) {
+  if (!req.auth || !req.auth.userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  next();
+}
+
+
